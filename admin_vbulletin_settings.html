@@ -1,0 +1,290 @@
+
+<div class="alert alert-info alert-dismissible fixed-top m-3 p-0 text-center small  d-none" id="pageErrors">
+    <span>...</span>
+    <button type="button" class="close py-0" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true" class="small" style="cursor:pointer">&times;</span>
+    </button>
+</div>
+
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="./">{lang.R_CPINDEX}</a></li>
+    <li class="breadcrumb-item"><a href="{action}">{olang.R_VBULLETIN_SETTINGS}</a></li>
+</ol>
+
+<script>
+function loadWhenjQueryIsReady() {
+    setTimeout(function() {
+        if (typeof jQuery == 'undefined' && typeof window.jQuery == 'undefined') {
+            loadWhenjQueryIsReady();
+        } else {
+            $(document.body).on('change',"#vbulletin_intr_enabled",function (e) {
+                if($('#vbulletin_intr_enabled option:selected').val() == 0) {
+                     $('#updateBtn').prop('disabled', false);
+                }
+            });
+
+            $('#vbulletinform').on('keyup change paste', 'input, select:not(#vbulletin_intr_enabled), textarea', function(){
+                if($('#vbulletin_intr_enabled option:selected').val() == 1) {
+                    $('#vbulletin_intr_enabled').val(0);
+                    $('#vbulletin_intr_enabled_help').html('{olang.VBULLETIN_INTR_TEST_NOTE}');
+                    updateSettings(false);
+                    $('#updateBtn').prop('disabled', true);
+                    $('#vbulletin_intr_enabled').prop('disabled', true);
+                }
+            });
+        }
+    }, 500);
+}
+loadWhenjQueryIsReady();
+
+var testingInProcess = false;
+
+function testSetting() {
+   if(testingInProcess) {
+        // alert('{lang.WAIT}');
+        return;
+    }
+
+    testingInProcess = true;
+
+	$.ajax({
+		url: '{action}&case=test&{H_FORM_KEYS_GET}&_ajax_=1',
+        dataType: 'json',
+		cache: false})
+		.done(function (data) {
+            testingInProcess = false;
+
+			if(data.content){
+                if(data.content == 'done') {
+                    $('#vbulletin_intr_enabled_help').html('<span class="text-success">{olang.VBULLETIN_INTR_TEST_NOTE_SUCCESS}</span>');
+                    $('#updateBtn').prop('disabled', false);
+                    $('#vbulletin_intr_enabled').prop('disabled', false);
+                } else {
+                    $('#vbulletin_intr_enabled_help').html('<span class="text-danger">{olang.VBULLETIN_INTR_TEST_NOTE_ERR}</span>');
+                }
+			} else {
+				this.fail();
+			}
+		})
+		.fail(function(data) {
+            testingInProcess = false;
+            $('#vbulletin_intr_enabled_help').html('<span class="text-danger">{lang.ERROR_TRY_AGAIN}</span>');
+        });
+
+        return false;
+}
+
+
+var updatingInProcess = false;
+function updateSettings(showMessages, test) {
+    if(updatingInProcess) {
+        // alert('{lang.WAIT}');
+        return;
+    }
+
+    updatingInProcess = true;
+    $('#vbulletinform').css('opacity', '0.4').css('pointer-events', 'none');
+    $('#updateBtn').prop('disabled', true);
+
+    var forceParam = showMessages ? 'force=1&' : '';
+
+	$.ajax({
+        type: 'POST',
+		url: '{action}&case=update&' + forceParam +'_ajax_=1',
+        dataType: 'json',
+        data: $('#vbulletinform').serialize(),
+		cache: false})
+		.done(function (data) {
+             updatingInProcess = false;
+			if(data.content){
+                $('#vbulletinform').css('opacity', '1').css('pointer-events', 'auto');
+
+                if(data.content == 'done') {
+                    if(showMessages) {
+                        $('#pageErrors>span').html('{lang.CONFIGS_UPDATED}');
+                        $('#pageErrors').removeClass('d-none alert-danger').addClass('alert-info').fadeOut(4000);
+                    }
+                    if(test) {
+                        testSetting();
+                    }
+                } else {
+                    this.fail();
+                }
+			} else {
+				this.fail();
+			}
+		})
+		.fail(function(data) {
+            updatingInProcess = false;
+            $('#vbulletinform').css('opacity', '1').css('pointer-events', 'auto');
+            if(showMessages) {
+                $('#pageErrors>span').html((data.content ? data.content : (data.responseJSON ? data.responseJSON.content  : '{lang.ERROR_TRY_AGAIN}')));
+                $('#pageErrors').removeClass('d-none alert-info').addClass('alert-danger').fadeOut(4000);
+            }
+        });
+
+        return false;
+}
+
+function switchTab(tab, item) {
+    $('.settingstab').addClass('d-none');
+    $('#' + tab).removeClass('d-none');
+    $('#alltabs .nav-link').removeClass('active');
+    $(item).addClass('active');
+
+}
+</script>
+
+<div class="d-flex justify-content-end my-3">
+    <button type="button" class="btn btn-outline-secondary mx-1" onclick="updateSettings(false, true)">{olang.VBULLETIN_INTR_TEST}</button>
+    <button type="button" class="btn btn-primary mx-1" id="updateBtn" disabled onclick="updateSettings(true);">{lang.UPDATE}</button>
+</div>
+
+<form id="vbulletinform">
+<div class="card bg-light" id="homepageSetting">
+    <div class="card-header">{lang.CONFIG_KLJ_MENUS_GENERAL}</div>
+    <div class="card-body">
+
+    <!-- vbulletin_intr_enabled -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_enabled" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_ENABLE}</label>
+        <div class="col-sm-10">
+            <select id="vbulletin_intr_enabled" name="vbulletin_intr_enabled" class="form-control" (config.vbulletin_intr_enabled==0?disabled:)>
+                <option value="0" (config.vbulletin_intr_enabled==0?selected:)>{lang.NO}</option>
+                <option value="1" (config.vbulletin_intr_enabled==1?selected:)>{lang.YES}</option>
+            </select>
+                <small id="vbulletin_intr_enabled_help" class="form-text text-muted"><IF NAME="config.vbulletin_intr_enabled==0">{olang.VBULLETIN_INTR_TEST_NOTE}</IF></small>
+        </div>
+    </div>
+
+    <!-- vbulletin_intr_type -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_type" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_TYPE}</label>
+        <div class="col-sm-10">
+            <select id="vbulletin_intr_type" name="vbulletin_intr_type" class="form-control">
+                <option value="path" (config.vbulletin_intr_type==path?selected:)>{olang.VBULLETIN_INTR_TYPE_PATH}</option>
+                <option value="db" (config.vbulletin_intr_type==db?selected:)>{olang.VBULLETIN_INTR_TYPE_DB}</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- vbulletin_intr_version5 -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_version5" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_VERSION5}</label>
+        <div class="col-sm-10">
+            <select id="vbulletin_intr_version5" name="vbulletin_intr_version5" class="form-control">
+                <option value="1" (config.vbulletin_intr_version5==1?selected:)>{lang.YES}</option>
+                <option value="0" (config.vbulletin_intr_version5==0?selected:)>{lang.NO}</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- vbulletin_intr_encoding -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_encoding" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_ENCODING}</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="vbulletin_intr_encoding" id="vbulletin_intr_encoding"
+                value="{config.vbulletin_intr_encoding}">
+        </div>
+    </div>
+
+    </div>
+</div>
+
+<div class="card text-center mt-4" id="alltabs">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+                <a class="nav-link(config.vbulletin_intr_type==path? active:)" href="javascript:void(0)" onclick="switchTab('pathTab', this)">{olang.VBULLETIN_INTR_TYPE_PATH}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link(config.vbulletin_intr_type==db? active:)" href="javascript:void(0)" onclick="switchTab('dbTab', this)">{olang.VBULLETIN_INTR_TYPE_DB}</a>
+            </li>
+        </ul>
+    </div>
+    <!-- path tab -->
+    <div class="card-body settingstab(config.vbulletin_intr_type!=path? d-none:)" id="pathTab">
+
+    <!-- vbulletin_intr_path -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_path" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_PATH}</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="vbulletin_intr_path" id="vbulletin_intr_path"
+                value="{config.vbulletin_intr_path}">
+        </div>
+    </div>
+
+    <!-- vbulletin_intr_config_path -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_config_path" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_CONFIG_PATH}</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="vbulletin_intr_config_path" id="vbulletin_intr_config_path" value="{config.vbulletin_intr_config_path}">
+        </div>
+    </div>
+
+    </div>
+
+    <!-- db tab -->
+    <div class="card-body settingstab (config.vbulletin_intr_type!=db? d-none:)" id="dbTab">
+
+    <!-- vbulletin_intr_db_server -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_db_server" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_DB_SERVER}</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="vbulletin_intr_db_server" id="vbulletin_intr_db_server"
+                value="{config.vbulletin_intr_db_server}">
+        </div>
+    </div>
+
+    <!-- vbulletin_intr_db_port -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_db_port" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_DB_PORT}</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="vbulletin_intr_db_port" id="vbulletin_intr_db_port"
+                value="{config.vbulletin_intr_db_port}">
+        </div>
+    </div>
+
+    <!-- vbulletin_intr_db_user -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_db_user" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_DB_USER}</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="vbulletin_intr_db_user" id="vbulletin_intr_db_user"
+                value="{config.vbulletin_intr_db_user}">
+        </div>
+    </div>
+
+    <!-- vbulletin_intr_db_password -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_db_password" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_DB_PASSWORD}</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="vbulletin_intr_db_password" id="vbulletin_intr_db_password"
+                value="{config.vbulletin_intr_db_password}">
+        </div>
+    </div>
+
+    <!-- vbulletin_intr_db_name -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_db_name" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_DB_NAME}</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="vbulletin_intr_db_name" id="vbulletin_intr_db_name"
+                value="{config.vbulletin_intr_db_name}">
+        </div>
+    </div>
+
+    <!-- vbulletin_intr_db_prefix -->
+    <div class="form-group row">
+        <label for="vbulletin_intr_db_prefix" class="col-sm-2 col-form-label">{olang.VBULLETIN_INTR_DB_PREFIX}</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="vbulletin_intr_db_prefix" id="vbulletin_intr_db_prefix"
+                value="{config.vbulletin_intr_db_prefix}">
+        </div>
+    </div>
+
+    </div>
+</div>
+
+{H_FORM_KEYS}
+</form>
+
