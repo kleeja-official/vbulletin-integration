@@ -21,7 +21,7 @@ $kleeja_plugin['vbulletin_integration']['information'] = [
     // who wrote this plugin?
     'plugin_developer' => 'kleeja.com',
     // this plugin version
-    'plugin_version' => '1.0',
+    'plugin_version' => '1.0.1',
     // explain what is this plugin, why should i use it?
     'plugin_description' => [
         'en' => 'VBulletin Membership Integration',
@@ -285,24 +285,39 @@ $kleeja_plugin['vbulletin_integration']['functions'] = [
     },
 
     'login_before_submit' => function($args) {
-        $args['forget_pass_link'] = rtrim($args['config']['vbulletin_intr_link'], '/') . '/lostpw';
-        return $args;
+        if ($args['config']['vbulletin_intr_enabled'] == 1) 
+        {
+            $args['forget_pass_link'] = rtrim($args['config']['vbulletin_intr_link'], '/').'/lostpw';
+            return $args;
+        }
     },
     'get_pass_resetpass_link' => function($args) {
-        $args['forgetpass_link'] = rtrim($args['config']['vbulletin_intr_link'], '/') . '/lostpw';
-        return $args;
+        if ($args['config']['vbulletin_intr_enabled'] == 1) 
+        {
+            $args['forgetpass_link'] = rtrim($args['config']['vbulletin_intr_link'], '/').'/lostpw';
+            return $args;
+        }
     },
     'register_not_default_sys' => function($args) {
-        $args['goto_forum_link'] = rtrim($args['config']['vbulletin_intr_link'], '/') . '/register';
-        return $args;
+        if ($args['config']['vbulletin_intr_enabled'] == 1) 
+        {
+            $args['goto_forum_link'] = rtrim($args['config']['vbulletin_intr_link'], '/').'/register';
+            return $args;
+        }
     },
     'no_submit_profile' => function($args) {
-        $args['goto_forum_link'] = rtrim($args['config']['vbulletin_intr_link'], '/') . '/settings/profile';
-        return $args;
+        if ($args['config']['vbulletin_intr_enabled'] == 1) 
+        {
+            $args['goto_forum_link'] = rtrim($args['config']['vbulletin_intr_link'], '/') . '/settings/profile';
+            return $args;
+        }
     },
     'end_common' => function($args) {
-        $args['config']['user_system'] = 'vbulletin';
-        return $args;
+        if ($args['config']['vbulletin_intr_enabled'] == 1) 
+        {
+            $args['config']['user_system'] = 'vbulletin';
+            return $args;
+        }
     },
 ];
 
