@@ -70,6 +70,7 @@ switch ($current_case)
                 'vbulletin_intr_config_path',
                 'vbulletin_intr_version5',
                 'vbulletin_intr_encoding',
+                'vbulletin_intr_link',
                 'vbulletin_intr_db_server',
                 'vbulletin_intr_db_port',
                 'vbulletin_intr_db_user',

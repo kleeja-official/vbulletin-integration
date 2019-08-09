@@ -21,7 +21,7 @@ $kleeja_plugin['vbulletin_integration']['information'] = [
     // who wrote this plugin?
     'plugin_developer' => 'kleeja.com',
     // this plugin version
-    'plugin_version' => '1.0.2',
+    'plugin_version' => '1.0.3',
     // explain what is this plugin, why should i use it?
     'plugin_description' => [
         'en' => 'VBulletin Membership Integration',
