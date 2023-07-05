@@ -264,7 +264,7 @@ $kleeja_plugin['vbulletin_integration']['functions'] = [
 
         $return_now = true;
 
-        $login_status = vbulletin_auth_login($args['name'], $args['pass'], $args['hashed'], $args['expire'], $args['loginadm']);
+        $login_status = vbulletin_auth_login($args['name'], $args['pass'], $args['expire'], $args['hashed'], $args['loginadm']);
 
         return compact('return_now', 'login_status');
     },
