@@ -21,7 +21,7 @@ $kleeja_plugin['vbulletin_integration']['information'] = [
     // who wrote this plugin?
     'plugin_developer' => 'kleeja.com',
     // this plugin version
-    'plugin_version' => '1.0.3',
+    'plugin_version' => '1.0.4',
     // explain what is this plugin, why should i use it?
     'plugin_description' => [
         'en' => 'VBulletin Membership Integration',
@@ -264,7 +264,7 @@ $kleeja_plugin['vbulletin_integration']['functions'] = [
 
         $return_now = true;
 
-        $login_status = vbulletin_auth_login($args['name'], $args['pass'], $args['hashed'], $args['expire'], $args['loginadm']);
+        $login_status = vbulletin_auth_login($args['name'], $args['pass'], $args['expire'], $args['hashed'], $args['loginadm']);
 
         return compact('return_now', 'login_status');
     },
