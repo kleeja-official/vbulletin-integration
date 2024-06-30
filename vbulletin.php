@@ -15,7 +15,7 @@ if (! defined('IN_COMMON'))
 }
 
 
-if (! function_exists('vbulletin_auth_login'))
+if (! function_exists('vbulletin_auth_connect'))
 {
     function vbulletin_auth_connect()
     {
@@ -108,7 +108,7 @@ if (! function_exists('vbulletin_auth_login'))
 
 if (! function_exists('vbulletin_auth_login'))
 {
-    function vbulletin_auth_login($name, $pass, $hashed = false, $expire, $loginadm = false, $return_username = false)
+    function vbulletin_auth_login($name, $pass, $expire, $hashed = false, $loginadm = false, $return_username = false)
     {
         global $config, $usrcp, $userinfo;
 
@@ -235,6 +235,6 @@ if (! function_exists('vbulletin_auth_username'))
 {
     function vbulletin_auth_username($user_id)
     {
-        return vbulletin_auth_login($user_id, false, false, 0, false, true);
+        return vbulletin_auth_login($user_id, false, 0, false, false, true);
     }
 }
